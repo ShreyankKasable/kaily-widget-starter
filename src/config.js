@@ -22,6 +22,12 @@ export const config = {
   // useKaily. Shape: { name, email, phone, hostId, additionalFields }.
   user: null,
 
+  // ── Context (optional) ──
+  // Extra situational info handed to the assistant so it can tailor replies.
+  // Fill from your app — e.g. { currentPage: location.pathname, plan: "pro" }.
+  // Or set/update it at runtime via setContext() from useKaily.
+  context: null,
+
   // ── Branding ──
   theme: {
     title: "Assistant",

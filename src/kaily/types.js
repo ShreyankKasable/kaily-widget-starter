@@ -42,6 +42,7 @@
  * @property {string} surfaceClient   Surface identifier, e.g. "web".
  * @property {"production" | "uat" | "sit"} [environment]  Optional cluster shortcut; OVERRIDES serviceBaseUrl when set.
  * @property {KailyUser | null} [user]  Logged-in user identity, or null for anonymous.
+ * @property {Object | null} [context]  Situational info handed to the assistant.
  * @property {WidgetTheme} theme      Branding.
  * @property {WidgetMount} mount      Where/how the widget mounts.
  * @property {WidgetFeatures} features  Feature toggles.

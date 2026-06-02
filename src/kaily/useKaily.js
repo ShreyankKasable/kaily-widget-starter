@@ -45,8 +45,9 @@ export function useKaily() {
         try {
           if (config.user) await bot.setUser(config.user);
           else await bot.unsetUser();
+          if (config.context) await bot.setContext(config.context);
         } catch (e) {
-          console.error("[kaily-widget] identity failed:", e);
+          console.error("[kaily-widget] identity/context failed:", e);
         }
         if (!active) return;
         setBot(bot);
@@ -171,6 +172,12 @@ export function useKaily() {
   );
   const unsetUser = useCallback(() => bot?.unsetUser(), [bot]);
 
+  // ── Context & data ─────────────────────────────────────────────────────────
+  // setContext: give the assistant situational info. captureData: record
+  // structured data (e.g. lead capture / analytics).
+  const setContext = useCallback((context) => bot?.setContext(context), [bot]);
+  const captureData = useCallback((data) => bot?.captureData(data), [bot]);
+
   return {
     bot,
     status,
@@ -181,5 +188,7 @@ export function useKaily() {
     stop,
     setUser,
     unsetUser,
+    setContext,
+    captureData,
   };
 }
