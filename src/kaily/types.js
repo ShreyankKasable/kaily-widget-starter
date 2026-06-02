@@ -30,8 +30,8 @@
  * @typedef {Object} WidgetConfig
  * @property {string} token           Bot token from the Kaily dashboard.
  * @property {string} serviceBaseUrl  Kaily API base URL.
- * @property {string} environment     SDK environment, e.g. "production".
  * @property {string} surfaceClient   Surface identifier, e.g. "web".
+ * @property {"production" | "uat" | "sit"} [environment]  Optional cluster shortcut; OVERRIDES serviceBaseUrl when set.
  * @property {WidgetTheme} theme      Branding.
  * @property {WidgetMount} mount      Where/how the widget mounts.
  * @property {WidgetFeatures} features  Feature toggles.

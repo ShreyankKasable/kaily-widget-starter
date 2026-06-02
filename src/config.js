@@ -9,8 +9,10 @@ export const config = {
   // ── Connection (read from .env) ──
   token: import.meta.env.VITE_KAILY_TOKEN,
   serviceBaseUrl: import.meta.env.VITE_KAILY_BASE_URL,
-  environment: "production",
   surfaceClient: "web",
+  // Optional shortcut to a known Kaily cluster: "production" | "uat" | "sit".
+  // ⚠️ If set, this OVERRIDES serviceBaseUrl above. Leave it out to use serviceBaseUrl.
+  // environment: "production",
 
   // ── Branding ──
   theme: {
