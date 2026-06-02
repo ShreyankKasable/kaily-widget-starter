@@ -9,14 +9,18 @@ import { useKaily } from "../kaily/useKaily";
 import { Launcher } from "./Launcher";
 import { MessageList } from "./MessageList";
 import { Composer } from "./Composer";
+import { HistoryPanel } from "./HistoryPanel";
 import "./styles.css";
 
 export function Widget() {
   const [open, setOpen] = useState(false);
-  const { status, messages, sending, send, stop } = useKaily();
+  const [showHistory, setShowHistory] = useState(false);
+  const { status, messages, sending, send, stop, listThreads, loadThread, newThread } =
+    useKaily();
 
   const accent = config.theme.primaryColor;
   const side = config.theme.position === "bottom-left" ? "kw-left" : "";
+  const threadsEnabled = config.features.threads;
 
   if (!open) {
     return (
@@ -33,13 +37,25 @@ export function Widget() {
     <div className={`kw-panel ${side}`}>
       <div className="kw-header" style={{ background: accent }}>
         <span>{config.theme.title}</span>
-        <button
-          className="kw-close"
-          onClick={() => setOpen(false)}
-          aria-label="Close chat"
-        >
-          ×
-        </button>
+        <div className="kw-header-actions">
+          {threadsEnabled && (
+            <button
+              className="kw-icon-btn"
+              onClick={() => setShowHistory(true)}
+              aria-label="Conversation history"
+              title="Conversation history"
+            >
+              🕑
+            </button>
+          )}
+          <button
+            className="kw-close"
+            onClick={() => setOpen(false)}
+            aria-label="Close chat"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       <MessageList messages={messages} accent={accent} />
@@ -51,6 +67,22 @@ export function Widget() {
         onSend={send}
         onStop={stop}
       />
+
+      {threadsEnabled && showHistory && (
+        <HistoryPanel
+          accent={accent}
+          listThreads={listThreads}
+          onSelect={(id) => {
+            loadThread(id);
+            setShowHistory(false);
+          }}
+          onNew={() => {
+            newThread();
+            setShowHistory(false);
+          }}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
     </div>
   );
 }

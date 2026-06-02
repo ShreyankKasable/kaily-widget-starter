@@ -5,7 +5,7 @@
 // and voice/video — so every SDK method ends up here, in one documented place.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { connect } from "./client";
 import { config } from "../config";
 import { plugins } from "../plugins";
@@ -17,6 +17,65 @@ import { plugins } from "../plugins";
 
 let msgSeq = 0;
 const nextId = (p) => `${p}-${Date.now()}-${msgSeq++}`;
+
+// The SDK may return lists in several shapes — normalize them to plain arrays.
+function pickArray(res, ...keys) {
+  if (Array.isArray(res)) return res;
+  for (const k of keys) {
+    if (Array.isArray(res?.data?.[k])) return res.data[k];
+  }
+  if (Array.isArray(res?.data)) return res.data;
+  for (const k of keys) {
+    if (Array.isArray(res?.[k])) return res[k];
+  }
+  return [];
+}
+
+function normalizeThreads(res) {
+  return pickArray(res, "threads", "items", "result")
+    .map((t) => ({
+      id: t.id || t.thread_id || t._id || "",
+      title: t.title || t.preview || t.name || "Conversation",
+      updatedAt: t.updated_at || t.created_at || null,
+    }))
+    .filter((t) => t.id);
+}
+
+// The thread id can arrive under different keys (or only on bot.currentThreadId).
+function pickThreadId(res, bot) {
+  return (
+    res?.data?.thread_id ||
+    res?.data?.threadId ||
+    res?.thread_id ||
+    res?.threadId ||
+    bot?.currentThreadId ||
+    null
+  );
+}
+
+// Pull the final assistant text out of a reply/result payload.
+function lastContent(res) {
+  const arr = Array.isArray(res?.data)
+    ? res.data
+    : res?.data?.messages || [res?.data];
+  return arr?.[arr.length - 1]?.content || "";
+}
+
+function normalizeMessages(res) {
+  return (
+    pickArray(res, "messages", "items", "result")
+      // Keep only chat messages (drop system/event rows).
+      .filter((m) => ["user", "assistant", "bot"].includes(m.role))
+      .map((m, i) => ({
+        id: m.id || m._id || `m-${i}`,
+        role: m.role === "assistant" || m.role === "bot" ? "bot" : "user",
+        text: m.content || m.text || m.message || "",
+      }))
+      .filter((m) => m.text)
+      // The API returns newest-first; show oldest-first like the live chat.
+      .reverse()
+  );
+}
 
 export function useKaily() {
   const [bot, setBot] = useState(/** @type {any} */ (null));
@@ -32,6 +91,22 @@ export function useKaily() {
 
   // Set true when the user hits Stop, so late stream callbacks are ignored.
   const stopped = useRef(false);
+
+  // The id of the bot bubble currently being streamed into. The SDK caches its
+  // socket listeners per thread (only the first message()'s listeners are kept),
+  // so the listeners MUST target this ref — not a per-send closure — or replies
+  // to later messages would overwrite the first reply.
+  const activeBotId = useRef(/** @type {string | null} */ (null));
+
+  // True once the current reply has finalized (so the result-fallback and
+  // listener don't both end the turn).
+  const finished = useRef(true);
+
+  // Latest bot instance, readable from the stable listeners below.
+  const botRef = useRef(/** @type {any} */ (null));
+  useEffect(() => {
+    botRef.current = bot;
+  }, [bot]);
 
   // ── Connect once on mount ──────────────────────────────────────────────────
   useEffect(() => {
@@ -68,6 +143,54 @@ export function useKaily() {
     };
   }, []);
 
+  // Write into the bot bubble that's currently streaming (append or replace).
+  const patchActive = useCallback((chunk, replace = false) => {
+    const id = activeBotId.current;
+    if (!id) return;
+    setMessages((list) =>
+      list.map((m) =>
+        m.id === id ? { ...m, text: replace ? chunk : m.text + chunk } : m,
+      ),
+    );
+  }, []);
+
+  // End the current turn (idempotent — the listener and the result-fallback may
+  // both try). The reply streams over a socket, so bot.message() resolves early;
+  // we end "sending" when the reply finalizes, not when the promise resolves.
+  const finish = useCallback(() => {
+    if (finished.current) return;
+    finished.current = true;
+    setSending(false);
+  }, []);
+
+  // Stable listeners reused for EVERY message. They target the active bubble via
+  // refs, so the SDK's per-thread listener cache (it keeps only the first
+  // message's listeners) can never misroute a reply into an older bubble.
+  const listeners = useMemo(
+    () => ({
+      // Stream the reply token by token.
+      deltaListener: (r) => {
+        if (stopped.current) return;
+        patchActive(r?.data?.content || "");
+      },
+      // Final answer — capture the thread id, set full text, end the stream.
+      replyListener: (r) => {
+        if (stopped.current) return;
+        const tid = pickThreadId(r, botRef.current);
+        if (tid) threadId.current = tid;
+        const content = lastContent(r);
+        if (content) patchActive(content, true);
+        finish();
+      },
+      // The SDK calls these directly, so they must exist. Hook them up if you
+      // want to show "thinking"/tool-running status in the UI.
+      progressListener: () => {},
+      toolMessageListener: () => {},
+      toolComponentMessageListener: () => {},
+    }),
+    [patchActive, finish],
+  );
+
   // ── Send a message and stream the reply ────────────────────────────────────
   const send = useCallback(
     async (text) => {
@@ -75,7 +198,9 @@ export function useKaily() {
       if (!trimmed || !bot || sending) return;
 
       const botId = nextId("b");
+      activeBotId.current = botId;
       stopped.current = false;
+      finished.current = false;
       // Optimistically add the user's message + an empty bot bubble to fill in.
       setMessages((list) => [
         ...list,
@@ -84,33 +209,6 @@ export function useKaily() {
       ]);
       setSending(true);
 
-      // Update the in-progress bot bubble: append a chunk, or replace it whole.
-      const patchBot = (chunk, replace = false) =>
-        setMessages((list) =>
-          list.map((m) =>
-            m.id === botId
-              ? { ...m, text: replace ? chunk : m.text + chunk }
-              : m,
-          ),
-        );
-
-      // The reply streams over a socket, so bot.message() resolves early. End the
-      // "sending" state when the stream actually finalizes (replyListener), not
-      // when the promise resolves — otherwise the Stop button only flashes.
-      let finished = false;
-      const finish = () => {
-        if (finished) return;
-        finished = true;
-        setSending(false);
-      };
-
-      const lastContent = (res) => {
-        const arr = Array.isArray(res?.data)
-          ? res.data
-          : res?.data?.messages || [res?.data];
-        return arr?.[arr.length - 1]?.content || "";
-      };
-
       try {
         const res = await bot.message(
           {
@@ -118,39 +216,29 @@ export function useKaily() {
             thread_id: threadId.current || undefined,
             path: window.location.pathname || "/",
           },
-          {
-            // Stream the reply token by token.
-            deltaListener: (r) => {
-              if (stopped.current) return;
-              patchBot(r?.data?.content || "");
-            },
-            // Final answer — capture the thread id, set full text, end the stream.
-            replyListener: (r) => {
-              if (stopped.current) return;
-              if (r?.data?.thread_id) threadId.current = r.data.thread_id;
-              const content = lastContent(r);
-              if (content) patchBot(content, true);
-              finish();
-            },
-          },
+          listeners,
         );
+        // The thread id can also arrive on the result — capture it so follow-up
+        // messages continue the same conversation.
+        const tid = pickThreadId(res, bot);
+        if (tid) threadId.current = tid;
         // Fallback: some setups return the final content directly instead of via
-        // replyListener. Only finalize here if it actually carries content;
-        // otherwise keep waiting for the socket stream.
-        if (!finished && !stopped.current) {
+        // replyListener. Only finalize here if it carries content; otherwise
+        // keep waiting for the socket stream.
+        if (!finished.current && !stopped.current) {
           const content = lastContent(res);
           if (content) {
-            patchBot(content, true);
+            patchActive(content, true);
             finish();
           }
         }
       } catch (e) {
         console.error("[kaily-widget] message failed:", e);
-        if (!stopped.current) patchBot("Sorry, something went wrong.", true);
+        if (!stopped.current) patchActive("Sorry, something went wrong.", true);
         finish();
       }
     },
-    [bot, sending],
+    [bot, sending, listeners, patchActive, finish],
   );
 
   // ── Stop the in-progress reply ─────────────────────────────────────────────
@@ -158,6 +246,7 @@ export function useKaily() {
     if (!bot || !sending) return;
     // Ignore any further stream callbacks and stop right away.
     stopped.current = true;
+    finished.current = true;
     setSending(false);
     try {
       await bot.stopMessage({ thread_id: threadId.current || undefined });
@@ -188,6 +277,33 @@ export function useKaily() {
   const removeAllTools = useCallback(() => bot?.removeAllTools(), [bot]);
   const getFrontendActions = useCallback(() => bot?.getFrontendActions(), [bot]);
 
+  // ── Thread history ─────────────────────────────────────────────────────────
+  // listThreads → past conversations; loadThread → reload one into the chat;
+  // newThread → start a fresh conversation.
+  const listThreads = useCallback(
+    async ({ page = 1, limit = 20 } = {}) => {
+      if (!bot) return [];
+      return normalizeThreads(await bot.getThreads({ page, limit }));
+    },
+    [bot],
+  );
+
+  const loadThread = useCallback(
+    async (id) => {
+      if (!bot || !id) return;
+      threadId.current = id;
+      // limit caps how many recent messages load; add cursor pagination
+      // (response.page.next) yourself if you need the full history.
+      setMessages(normalizeMessages(await bot.getMessages({ threadId: id, limit: 50 })));
+    },
+    [bot],
+  );
+
+  const newThread = useCallback(() => {
+    threadId.current = null;
+    setMessages([]);
+  }, []);
+
   return {
     bot,
     status,
@@ -204,5 +320,8 @@ export function useKaily() {
     removeTool,
     removeAllTools,
     getFrontendActions,
+    listThreads,
+    loadThread,
+    newThread,
   };
 }
