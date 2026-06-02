@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { connect } from "./client";
+import { config } from "../config";
 
 /**
  * @typedef {"connecting" | "ready" | "error"} KailyStatus
@@ -37,7 +38,16 @@ export function useKaily() {
     setStatus("connecting");
 
     connect()
-      .then(({ bot }) => {
+      .then(async ({ bot }) => {
+        if (!active) return;
+        // Identify the user before the first message so the conversation is
+        // scoped correctly. config.user → setUser; otherwise stay anonymous.
+        try {
+          if (config.user) await bot.setUser(config.user);
+          else await bot.unsetUser();
+        } catch (e) {
+          console.error("[kaily-widget] identity failed:", e);
+        }
         if (!active) return;
         setBot(bot);
         setStatus("ready");
@@ -152,5 +162,24 @@ export function useKaily() {
     }
   }, [bot, sending]);
 
-  return { bot, status, error, messages, sending, send, stop };
+  // ── Identity ───────────────────────────────────────────────────────────────
+  // Call these to identify the user at runtime, e.g. after they log in/out.
+  const setUser = useCallback(
+    /** @param {import("./types").KailyUser} user */
+    (user) => bot?.setUser(user),
+    [bot],
+  );
+  const unsetUser = useCallback(() => bot?.unsetUser(), [bot]);
+
+  return {
+    bot,
+    status,
+    error,
+    messages,
+    sending,
+    send,
+    stop,
+    setUser,
+    unsetUser,
+  };
 }

@@ -27,11 +27,21 @@
  */
 
 /**
+ * @typedef {Object} KailyUser
+ * @property {string} [name]
+ * @property {string} [email]
+ * @property {string} [phone]
+ * @property {string | number} [hostId]  Your app's stable id for this user.
+ * @property {Object} [additionalFields]  Any extra fields to attach.
+ */
+
+/**
  * @typedef {Object} WidgetConfig
  * @property {string} token           Bot token from the Kaily dashboard.
  * @property {string} serviceBaseUrl  Kaily API base URL.
  * @property {string} surfaceClient   Surface identifier, e.g. "web".
  * @property {"production" | "uat" | "sit"} [environment]  Optional cluster shortcut; OVERRIDES serviceBaseUrl when set.
+ * @property {KailyUser | null} [user]  Logged-in user identity, or null for anonymous.
  * @property {WidgetTheme} theme      Branding.
  * @property {WidgetMount} mount      Where/how the widget mounts.
  * @property {WidgetFeatures} features  Feature toggles.

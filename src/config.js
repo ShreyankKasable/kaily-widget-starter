@@ -14,6 +14,14 @@ export const config = {
   // ⚠️ If set, this OVERRIDES serviceBaseUrl above. Leave it out to use serviceBaseUrl.
   // environment: "production",
 
+  // ── User identity (optional) ──
+  // Anonymous by default. To scope conversations to a logged-in user, fill this
+  // from your own app/auth — e.g.:
+  //   user: { name: "Jane", email: "jane@acme.com", hostId: currentUser.id },
+  // Or set it at runtime after login via the setUser()/unsetUser() returned by
+  // useKaily. Shape: { name, email, phone, hostId, additionalFields }.
+  user: null,
+
   // ── Branding ──
   theme: {
     title: "Assistant",
