@@ -1,0 +1,128 @@
+/* All classes are prefixed kw- to avoid clashing with the host page. */
+
+.kw-launcher {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 2147483000;
+}
+
+.kw-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 370px;
+  max-width: calc(100vw - 32px);
+  height: 560px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  font-family: system-ui, -apple-system, sans-serif;
+  z-index: 2147483000;
+}
+
+.kw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.kw-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.kw-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f7f8fa;
+}
+
+.kw-empty {
+  margin: auto;
+  color: #8a90a2;
+  font-size: 14px;
+  text-align: center;
+}
+
+.kw-msg {
+  display: flex;
+}
+
+.kw-msg.kw-user {
+  justify-content: flex-end;
+}
+
+.kw-bubble {
+  max-width: 80%;
+  padding: 9px 13px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: #fff;
+  color: #1a1f36;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.kw-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #eceef3;
+  background: #fff;
+}
+
+.kw-input input {
+  flex: 1;
+  border: 1px solid #d8dce6;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.kw-input input:focus {
+  border-color: #b3b9cc;
+}
+
+.kw-input button {
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kw-input button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
