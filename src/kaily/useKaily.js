@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { connect } from "./client";
 import { config } from "../config";
+import { plugins } from "../plugins";
 
 /**
  * @typedef {"connecting" | "ready" | "error"} KailyStatus
@@ -46,8 +47,10 @@ export function useKaily() {
           if (config.user) await bot.setUser(config.user);
           else await bot.unsetUser();
           if (config.context) await bot.setContext(config.context);
+          // Register client tools so the assistant can call them.
+          if (plugins.length) await bot.addTool(plugins);
         } catch (e) {
-          console.error("[kaily-widget] identity/context failed:", e);
+          console.error("[kaily-widget] identity/context/tools failed:", e);
         }
         if (!active) return;
         setBot(bot);
@@ -178,6 +181,13 @@ export function useKaily() {
   const setContext = useCallback((context) => bot?.setContext(context), [bot]);
   const captureData = useCallback((data) => bot?.captureData(data), [bot]);
 
+  // ── Client tools (plugins) ─────────────────────────────────────────────────
+  // Register/remove tools at runtime. Tools in plugins.js are added on connect.
+  const addTool = useCallback((tools) => bot?.addTool(tools), [bot]);
+  const removeTool = useCallback((name) => bot?.removeTool(name), [bot]);
+  const removeAllTools = useCallback(() => bot?.removeAllTools(), [bot]);
+  const getFrontendActions = useCallback(() => bot?.getFrontendActions(), [bot]);
+
   return {
     bot,
     status,
@@ -190,5 +200,9 @@ export function useKaily() {
     unsetUser,
     setContext,
     captureData,
+    addTool,
+    removeTool,
+    removeAllTools,
+    getFrontendActions,
   };
 }
