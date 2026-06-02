@@ -331,6 +331,14 @@ export function useKaily() {
     setMessages([]);
   }, [bot]);
 
+  // Update a stored message's data. Used to persist interactive state back onto
+  // a message — e.g. a dropdown/form selection inside a bot reply:
+  //   updateMessage(threadId, messageId, { tools: [{ type: "dropdown", selectedOptions }] })
+  const updateMessage = useCallback(
+    (tId, messageId, data) => bot?.updateMessage(tId, messageId, data),
+    [bot],
+  );
+
   return {
     bot,
     status,
@@ -353,5 +361,6 @@ export function useKaily() {
     updateThread,
     deleteThread,
     deleteAllThreads,
+    updateMessage,
   };
 }
