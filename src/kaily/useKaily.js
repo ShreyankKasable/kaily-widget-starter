@@ -396,6 +396,20 @@ export function useKaily() {
     [bot],
   );
 
+  // Give the assistant a set of reference documents for the current thread.
+  // Each document: { path, name, size, type }.
+  const setDocuments = useCallback(
+    (documents) =>
+      bot?.setDocuments({ documents, threadId: threadId.current || undefined }),
+    [bot],
+  );
+
+  // Attach a custom HTML component (string) to a specific message.
+  const uploadHtmlComponent = useCallback(
+    (html, messageId) => bot?.uploadHtmlComponent(html, messageId),
+    [bot],
+  );
+
   return {
     bot,
     status,
@@ -420,5 +434,7 @@ export function useKaily() {
     deleteAllThreads,
     updateMessage,
     uploadFile,
+    setDocuments,
+    uploadHtmlComponent,
   };
 }
