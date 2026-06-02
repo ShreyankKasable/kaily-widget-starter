@@ -28,6 +28,9 @@ export function useKaily() {
   // without re-triggering send().
   const threadId = useRef(/** @type {string | null} */ (null));
 
+  // Set true when the user hits Stop, so late stream callbacks are ignored.
+  const stopped = useRef(false);
+
   // ── Connect once on mount ──────────────────────────────────────────────────
   useEffect(() => {
     let active = true;
@@ -58,6 +61,7 @@ export function useKaily() {
       if (!trimmed || !bot || sending) return;
 
       const botId = nextId("b");
+      stopped.current = false;
       // Optimistically add the user's message + an empty bot bubble to fill in.
       setMessages((list) => [
         ...list,
@@ -76,8 +80,25 @@ export function useKaily() {
           ),
         );
 
+      // The reply streams over a socket, so bot.message() resolves early. End the
+      // "sending" state when the stream actually finalizes (replyListener), not
+      // when the promise resolves — otherwise the Stop button only flashes.
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        setSending(false);
+      };
+
+      const lastContent = (res) => {
+        const arr = Array.isArray(res?.data)
+          ? res.data
+          : res?.data?.messages || [res?.data];
+        return arr?.[arr.length - 1]?.content || "";
+      };
+
       try {
-        await bot.message(
+        const res = await bot.message(
           {
             text: trimmed,
             thread_id: threadId.current || undefined,
@@ -85,27 +106,51 @@ export function useKaily() {
           },
           {
             // Stream the reply token by token.
-            deltaListener: (res) => patchBot(res?.data?.content || ""),
-            // Final answer — capture the thread id so the conversation continues.
-            replyListener: (res) => {
-              if (res?.data?.thread_id) threadId.current = res.data.thread_id;
-              const arr = Array.isArray(res?.data)
-                ? res.data
-                : res?.data?.messages || [res?.data];
-              const last = arr[arr.length - 1] || {};
-              if (last?.content) patchBot(last.content, true);
+            deltaListener: (r) => {
+              if (stopped.current) return;
+              patchBot(r?.data?.content || "");
+            },
+            // Final answer — capture the thread id, set full text, end the stream.
+            replyListener: (r) => {
+              if (stopped.current) return;
+              if (r?.data?.thread_id) threadId.current = r.data.thread_id;
+              const content = lastContent(r);
+              if (content) patchBot(content, true);
+              finish();
             },
           },
         );
+        // Fallback: some setups return the final content directly instead of via
+        // replyListener. Only finalize here if it actually carries content;
+        // otherwise keep waiting for the socket stream.
+        if (!finished && !stopped.current) {
+          const content = lastContent(res);
+          if (content) {
+            patchBot(content, true);
+            finish();
+          }
+        }
       } catch (e) {
         console.error("[kaily-widget] message failed:", e);
-        patchBot("Sorry, something went wrong.", true);
-      } finally {
-        setSending(false);
+        if (!stopped.current) patchBot("Sorry, something went wrong.", true);
+        finish();
       }
     },
     [bot, sending],
   );
 
-  return { bot, status, error, messages, sending, send };
+  // ── Stop the in-progress reply ─────────────────────────────────────────────
+  const stop = useCallback(async () => {
+    if (!bot || !sending) return;
+    // Ignore any further stream callbacks and stop right away.
+    stopped.current = true;
+    setSending(false);
+    try {
+      await bot.stopMessage({ thread_id: threadId.current || undefined });
+    } catch (e) {
+      console.error("[kaily-widget] stop failed:", e);
+    }
+  }, [bot, sending]);
+
+  return { bot, status, error, messages, sending, send, stop };
 }

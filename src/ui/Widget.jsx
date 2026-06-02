@@ -13,7 +13,7 @@ import "./styles.css";
 
 export function Widget() {
   const [open, setOpen] = useState(false);
-  const { status, messages, sending, send } = useKaily();
+  const { status, messages, sending, send, stop } = useKaily();
 
   const accent = config.theme.primaryColor;
   const side = config.theme.position === "bottom-left" ? "kw-left" : "";
@@ -44,8 +44,13 @@ export function Widget() {
 
       <MessageList messages={messages} accent={accent} />
 
-      {/* Block sending until the bot is connected. */}
-      <Composer accent={accent} disabled={sending || status !== "ready"} onSend={send} />
+      <Composer
+        accent={accent}
+        sending={sending}
+        ready={status === "ready"}
+        onSend={send}
+        onStop={stop}
+      />
     </div>
   );
 }

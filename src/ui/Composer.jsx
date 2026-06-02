@@ -1,12 +1,13 @@
 import { useState } from "react";
 
 // The text input + send button at the bottom of the panel.
-export function Composer({ accent, disabled, onSend }) {
+// While a reply is streaming, the Send button becomes a Stop button.
+export function Composer({ accent, sending, ready, onSend, onStop }) {
   const [input, setInput] = useState("");
 
   const submit = () => {
     const text = input.trim();
-    if (!text || disabled) return;
+    if (!text || sending || !ready) return;
     onSend(text);
     setInput("");
   };
@@ -15,14 +16,21 @@ export function Composer({ accent, disabled, onSend }) {
     <div className="kw-input">
       <input
         type="text"
-        placeholder="Type a message…"
+        placeholder={ready ? "Type a message…" : "Connecting…"}
         value={input}
+        disabled={!ready}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && submit()}
       />
-      <button style={{ background: accent }} onClick={submit} disabled={disabled}>
-        Send
-      </button>
+      {sending ? (
+        <button className="kw-stop" onClick={onStop} aria-label="Stop generating">
+          ■ Stop
+        </button>
+      ) : (
+        <button style={{ background: accent }} onClick={submit} disabled={!ready}>
+          Send
+        </button>
+      )}
     </div>
   );
 }
