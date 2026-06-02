@@ -106,15 +106,24 @@
   gap: 6px;
 }
 .kw-thread {
-  text-align: left;
-  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: #f7f7f9;
   border-radius: 10px;
-  padding: 10px 12px;
-  cursor: pointer;
+  padding: 4px 6px 4px 12px;
 }
 .kw-thread:hover {
   background: #eeeef2;
+}
+.kw-thread-main {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 6px 0;
+  cursor: pointer;
 }
 .kw-thread-title {
   font-size: 14px;
@@ -127,6 +136,39 @@
   font-size: 11px;
   color: #999;
   margin-top: 2px;
+}
+.kw-thread-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.kw-thread:hover .kw-thread-actions {
+  opacity: 1;
+}
+.kw-thread-actions button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px;
+  border-radius: 6px;
+}
+.kw-thread-actions button:hover {
+  background: #ddd;
+}
+.kw-clear-all {
+  margin: 8px 12px 12px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #e5484d;
+  font-size: 13px;
+  cursor: pointer;
+}
+.kw-clear-all:hover {
+  background: #fdecec;
 }
 
 .kw-messages {

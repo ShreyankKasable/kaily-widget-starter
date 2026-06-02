@@ -15,8 +15,19 @@ import "./styles.css";
 export function Widget() {
   const [open, setOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const { status, messages, sending, send, stop, listThreads, loadThread, newThread } =
-    useKaily();
+  const {
+    status,
+    messages,
+    sending,
+    send,
+    stop,
+    listThreads,
+    loadThread,
+    newThread,
+    updateThread,
+    deleteThread,
+    deleteAllThreads,
+  } = useKaily();
 
   const accent = config.theme.primaryColor;
   const side = config.theme.position === "bottom-left" ? "kw-left" : "";
@@ -72,6 +83,9 @@ export function Widget() {
         <HistoryPanel
           accent={accent}
           listThreads={listThreads}
+          updateThread={updateThread}
+          deleteThread={deleteThread}
+          deleteAllThreads={deleteAllThreads}
           onSelect={(id) => {
             loadThread(id);
             setShowHistory(false);

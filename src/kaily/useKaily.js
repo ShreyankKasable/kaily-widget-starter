@@ -304,6 +304,33 @@ export function useKaily() {
     setMessages([]);
   }, []);
 
+  // Rename a conversation.
+  const updateThread = useCallback(
+    (id, title) => bot?.updateThread({ threadId: id, title }),
+    [bot],
+  );
+
+  // Delete one conversation; if it's the open one, clear the chat.
+  const deleteThread = useCallback(
+    async (id) => {
+      if (!bot || !id) return;
+      await bot.deleteThread(id);
+      if (threadId.current === id) {
+        threadId.current = null;
+        setMessages([]);
+      }
+    },
+    [bot],
+  );
+
+  // Delete every conversation and clear the chat.
+  const deleteAllThreads = useCallback(async () => {
+    if (!bot) return;
+    await bot.deleteAllThreads({});
+    threadId.current = null;
+    setMessages([]);
+  }, [bot]);
+
   return {
     bot,
     status,
@@ -323,5 +350,8 @@ export function useKaily() {
     listThreads,
     loadThread,
     newThread,
+    updateThread,
+    deleteThread,
+    deleteAllThreads,
   };
 }

@@ -14,8 +14,17 @@ function formatDate(d) {
 }
 
 // Slides over the chat panel to list past conversations. Selecting one reloads
-// it; "New conversation" starts fresh.
-export function HistoryPanel({ accent, listThreads, onSelect, onNew, onClose }) {
+// it; you can also rename, delete, or clear all conversations.
+export function HistoryPanel({
+  accent,
+  listThreads,
+  onSelect,
+  onNew,
+  onClose,
+  updateThread,
+  deleteThread,
+  deleteAllThreads,
+}) {
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +38,25 @@ export function HistoryPanel({ accent, listThreads, onSelect, onNew, onClose }) 
       active = false;
     };
   }, [listThreads]);
+
+  const rename = async (t) => {
+    const title = window.prompt("Rename conversation", t.title);
+    if (!title || title === t.title) return;
+    await updateThread(t.id, title);
+    setThreads((list) => list.map((x) => (x.id === t.id ? { ...x, title } : x)));
+  };
+
+  const remove = async (id) => {
+    if (!window.confirm("Delete this conversation?")) return;
+    await deleteThread(id);
+    setThreads((list) => list.filter((x) => x.id !== id));
+  };
+
+  const clearAll = async () => {
+    if (!window.confirm("Delete ALL conversations?")) return;
+    await deleteAllThreads();
+    setThreads([]);
+  };
 
   return (
     <div className="kw-history">
@@ -49,14 +77,30 @@ export function HistoryPanel({ accent, listThreads, onSelect, onNew, onClose }) 
           <div className="kw-empty">No past conversations</div>
         )}
         {threads.map((t) => (
-          <button key={t.id} className="kw-thread" onClick={() => onSelect(t.id)}>
-            <div className="kw-thread-title">{t.title}</div>
-            {t.updatedAt && (
-              <div className="kw-thread-date">{formatDate(t.updatedAt)}</div>
-            )}
-          </button>
+          <div key={t.id} className="kw-thread">
+            <button className="kw-thread-main" onClick={() => onSelect(t.id)}>
+              <div className="kw-thread-title">{t.title}</div>
+              {t.updatedAt && (
+                <div className="kw-thread-date">{formatDate(t.updatedAt)}</div>
+              )}
+            </button>
+            <div className="kw-thread-actions">
+              <button onClick={() => rename(t)} title="Rename" aria-label="Rename">
+                ✏️
+              </button>
+              <button onClick={() => remove(t.id)} title="Delete" aria-label="Delete">
+                🗑️
+              </button>
+            </div>
+          </div>
         ))}
       </div>
+
+      {threads.length > 0 && (
+        <button className="kw-clear-all" onClick={clearAll}>
+          Clear all conversations
+        </button>
+      )}
     </div>
   );
 }
