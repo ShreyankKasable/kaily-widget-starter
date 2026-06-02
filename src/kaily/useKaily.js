@@ -53,6 +53,16 @@ function pickThreadId(res, bot) {
   );
 }
 
+// Read a File as a base64 data URL (the SDK expects `data_url` on uploads).
+function readDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 // Pull the final assistant text out of a reply/result payload.
 function lastContent(res) {
   const arr = Array.isArray(res?.data)
@@ -193,9 +203,9 @@ export function useKaily() {
 
   // ── Send a message and stream the reply ────────────────────────────────────
   const send = useCallback(
-    async (text) => {
+    async (text, attachments = []) => {
       const trimmed = (text || "").trim();
-      if (!trimmed || !bot || sending) return;
+      if ((!trimmed && attachments.length === 0) || !bot || sending) return;
 
       const botId = nextId("b");
       activeBotId.current = botId;
@@ -204,7 +214,7 @@ export function useKaily() {
       // Optimistically add the user's message + an empty bot bubble to fill in.
       setMessages((list) => [
         ...list,
-        { id: nextId("u"), role: "user", text: trimmed },
+        { id: nextId("u"), role: "user", text: trimmed, files: attachments },
         { id: botId, role: "bot", text: "" },
       ]);
       setSending(true);
@@ -215,6 +225,20 @@ export function useKaily() {
             text: trimmed,
             thread_id: threadId.current || undefined,
             path: window.location.pathname || "/",
+            ...(attachments.length
+              ? {
+                  files: attachments.map((f) => ({
+                    name: f.name,
+                    type: f.type,
+                    size: f.size,
+                    data_url: f.data_url,
+                    url: f.url,
+                    cdn_path: f.cdn_path,
+                    fileId: f.fileId,
+                    imageUrl: f.imageUrl,
+                  })),
+                }
+              : {}),
           },
           listeners,
         );
@@ -339,6 +363,39 @@ export function useKaily() {
     [bot],
   );
 
+  // ── Files ──────────────────────────────────────────────────────────────────
+  // Upload a File (gets a signed URL, then PUTs the file) and return a reference
+  // you pass as the 2nd arg to send(): send(text, [ref]).
+  const uploadFile = useCallback(
+    async (file) => {
+      if (!bot) throw new Error("[kaily-widget] not connected");
+      const data_url = await readDataUrl(file);
+      const res = await bot.getUploadUrl({
+        namespace: "client-files",
+        options: {
+          file_name: file.name,
+          file_type: file.type,
+          file_size: file.size,
+          data_url,
+        },
+      });
+      const url = res?.url || res?.data?.url;
+      await bot.upload(url, file, file.type);
+      // The server validates these fields on the message — keep them all.
+      return {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        data_url,
+        url,
+        cdn_path: res?.cdn_path || res?.data?.cdn_path,
+        fileId: res?.fileId || res?.data?.fileId,
+        imageUrl: res?.imageUrl || res?.data?.imageUrl,
+      };
+    },
+    [bot],
+  );
+
   return {
     bot,
     status,
@@ -362,5 +419,6 @@ export function useKaily() {
     deleteThread,
     deleteAllThreads,
     updateMessage,
+    uploadFile,
   };
 }

@@ -46,6 +46,22 @@ export function MessageList({ messages, accent }) {
             ) : (
               m.text
             )}
+
+            {m.files?.length > 0 && (
+              <div className="kw-msg-files">
+                {m.files.map((f, i) => (
+                  <a
+                    key={i}
+                    href={f.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kw-file-link"
+                  >
+                    📎 {f.name}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ))}

@@ -27,11 +27,13 @@ export function Widget() {
     updateThread,
     deleteThread,
     deleteAllThreads,
+    uploadFile,
   } = useKaily();
 
   const accent = config.theme.primaryColor;
   const side = config.theme.position === "bottom-left" ? "kw-left" : "";
   const threadsEnabled = config.features.threads;
+  const attachmentsEnabled = config.features.attachments;
 
   if (!open) {
     return (
@@ -77,6 +79,8 @@ export function Widget() {
         ready={status === "ready"}
         onSend={send}
         onStop={stop}
+        attachmentsEnabled={attachmentsEnabled}
+        onUpload={uploadFile}
       />
 
       {threadsEnabled && showHistory && (
