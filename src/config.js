@@ -1,14 +1,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Widget configuration — THIS is the main file you edit.
-// Set your token + API URL in `.env` (see `.env.example`), then tweak the theme,
-// mount mode, and feature toggles below.
+// Set your token + API URL below, tweak the theme, mount mode, and which
+// features are on. Plain strings (no env vars) so the same values work in both
+// `npm run dev` and `npm run deploy`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** @type {import("./kaily/types").WidgetConfig} */
 export const config = {
-  // ── Connection (read from .env) ──
-  token: import.meta.env.VITE_KAILY_TOKEN,
-  serviceBaseUrl: import.meta.env.VITE_KAILY_BASE_URL,
+  // ── Connection (REQUIRED) ──
+  // Get these from the Kaily dashboard. Replace the placeholders before running.
+  token: "cat-xxxxxxxx", // your bot token
+  serviceBaseUrl: "https://asia-south1.public.copilotz0.de", // your Kaily API base URL
   surfaceClient: "web",
   // Optional shortcut to a known Kaily cluster: "production" | "uat" | "sit".
   // ⚠️ If set, this OVERRIDES serviceBaseUrl above. Leave it out to use serviceBaseUrl.
@@ -51,7 +53,7 @@ export const config = {
     attachments: true, // file uploads
     suggestions: true, // suggested replies
     feedback: true, // thumbs up/down on bot replies
-    voiceCall: true, // voice calls (advanced)
-    videoCall: false, // video calls (advanced)
+    voiceCall: false, // voice calls (advanced — needs Retell on your bot)
+    videoCall: false, // video calls (advanced — needs Anam on your bot)
   },
 };

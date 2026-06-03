@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Kaily platform client — bootstraps the SDK and connects the bot.
 // This is part of the SDK layer; you normally don't need to touch it.
-// All connection settings come from `config.js` (which reads `.env`).
+// All connection settings come from `config.js`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { CopilotPlatform } from "@kaily-ai/chat-sdk";
@@ -14,7 +14,7 @@ let platform = null;
 function buildOptions(extra = {}) {
   if (!config.serviceBaseUrl) {
     throw new Error(
-      "[kaily-widget] Missing serviceBaseUrl — set VITE_KAILY_BASE_URL in your .env",
+      "[kaily-widget] Missing serviceBaseUrl — set it in src/config.js",
     );
   }
   const options = {
@@ -45,7 +45,7 @@ export function getPlatform() {
 export async function connect() {
   if (!config.token) {
     throw new Error(
-      "[kaily-widget] Missing token — set VITE_KAILY_TOKEN in your .env",
+      "[kaily-widget] Missing token — set it in src/config.js",
     );
   }
   const p = getPlatform();

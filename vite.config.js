@@ -2,7 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 
-// Local dev/preview config. The production CDN bundle is built in a later step.
+// Local dev/preview config. Production deploy is handled by `npm run deploy`
+// (seraph's deploy() bundles src/index.jsx and uploads it to the CDN).
 export default defineConfig({
   plugins: [react()],
   resolve: {
