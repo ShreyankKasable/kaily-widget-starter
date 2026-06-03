@@ -11,6 +11,7 @@ import { MessageList } from "./MessageList";
 import { Composer } from "./Composer";
 import { HistoryPanel } from "./HistoryPanel";
 import { VoiceButton } from "./VoiceButton";
+import { VideoCall } from "./VideoCall";
 import "./styles.css";
 
 export function Widget() {
@@ -33,6 +34,9 @@ export function Widget() {
     sendFeedback,
     startVoiceCall,
     endVoiceCall,
+    startVideoCall,
+    sendVideoMessage,
+    endVideoCall,
   } = useKaily();
 
   const accent = config.theme.primaryColor;
@@ -40,6 +44,8 @@ export function Widget() {
   const threadsEnabled = config.features.threads;
   const attachmentsEnabled = config.features.attachments;
   const voiceEnabled = config.features.voiceCall;
+  const videoEnabled = config.features.videoCall;
+  const [showVideo, setShowVideo] = useState(false);
 
   // Fetch suggested prompts once the bot is ready and the chat is empty.
   const [suggestions, setSuggestions] = useState(null);
@@ -68,6 +74,16 @@ export function Widget() {
       <div className="kw-header" style={{ background: accent }}>
         <span>{config.theme.title}</span>
         <div className="kw-header-actions">
+          {videoEnabled && (
+            <button
+              className="kw-icon-btn"
+              onClick={() => setShowVideo(true)}
+              aria-label="Start video call"
+              title="Start video call"
+            >
+              🎥
+            </button>
+          )}
           {voiceEnabled && (
             <VoiceButton
               startVoiceCall={startVoiceCall}
@@ -129,6 +145,15 @@ export function Widget() {
             setShowHistory(false);
           }}
           onClose={() => setShowHistory(false)}
+        />
+      )}
+
+      {videoEnabled && showVideo && (
+        <VideoCall
+          startVideoCall={startVideoCall}
+          sendVideoMessage={sendVideoMessage}
+          endVideoCall={endVideoCall}
+          onClose={() => setShowVideo(false)}
         />
       )}
     </div>

@@ -443,6 +443,38 @@ export function useKaily() {
     [bot],
   );
 
+  // ── Video call ─────────────────────────────────────────────────────────────
+  // initiateWebVideoCall returns an Anam session token; the UI (VideoCall)
+  // streams the talking avatar via @anam-ai/js-sdk. videoCallMessage relays the
+  // user's speech to the bot and the reply text drives client.talk(). getAIActions
+  // fetches AI-driven frontend actions for the call.
+  const startVideoCall = useCallback(
+    (onComponent) =>
+      bot?.initiateWebVideoCall(
+        { thread_id: threadId.current || bot?.currentThreadId },
+        { componentListener: onComponent || (() => {}) },
+      ),
+    [bot],
+  );
+  const sendVideoMessage = useCallback(
+    (text, listeners, endEvent) =>
+      bot?.videoCallMessage(
+        { text, thread_id: threadId.current || undefined },
+        listeners,
+        endEvent,
+      ),
+    [bot],
+  );
+  const endVideoCall = useCallback(
+    () => bot?.disconnectWebCall({ thread_id: threadId.current || undefined }),
+    [bot],
+  );
+  const getAIActions = useCallback(
+    (requestData = { thread_id: threadId.current || undefined }) =>
+      bot?.getAIActions(requestData),
+    [bot],
+  );
+
   // ── Feedback ───────────────────────────────────────────────────────────────
   // Rate a bot reply. rating: "POSITIVE" | "NEGATIVE".
   const sendFeedback = useCallback(
@@ -504,5 +536,9 @@ export function useKaily() {
     sendFeedback,
     startVoiceCall,
     endVoiceCall,
+    startVideoCall,
+    sendVideoMessage,
+    endVideoCall,
+    getAIActions,
   };
 }
