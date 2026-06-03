@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 // Renders the chat transcript and keeps it scrolled to the latest message.
 // Bot replies arrive as Markdown (images, links, lists, bold, …) and are
 // rendered with react-markdown. User messages are shown as plain text.
-export function MessageList({ messages, accent }) {
+export function MessageList({ messages, accent, suggestions, onPickSuggestion }) {
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -14,9 +14,30 @@ export function MessageList({ messages, accent }) {
 
   return (
     <div className="kw-messages" ref={listRef}>
-      {messages.length === 0 && (
-        <div className="kw-empty">Ask me anything to get started.</div>
-      )}
+      {messages.length === 0 &&
+        (suggestions ? (
+          <div className="kw-suggestions">
+            {suggestions.greeting && (
+              <div className="kw-sg-greeting">{suggestions.greeting}</div>
+            )}
+            {suggestions.text && (
+              <div className="kw-sg-text">{suggestions.text}</div>
+            )}
+            <div className="kw-sg-chips">
+              {suggestions.prompts.map((p, i) => (
+                <button
+                  key={i}
+                  className="kw-sg-chip"
+                  onClick={() => onPickSuggestion?.(p)}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="kw-empty">Ask me anything to get started.</div>
+        ))}
       {messages.map((m) => (
         <div key={m.id} className={`kw-msg kw-${m.role}`}>
           <div

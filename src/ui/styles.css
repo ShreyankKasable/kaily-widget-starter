@@ -187,6 +187,38 @@
   text-align: center;
 }
 
+.kw-suggestions {
+  margin: auto 0 0;
+}
+.kw-sg-greeting {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.kw-sg-text {
+  font-size: 13px;
+  color: #777;
+  margin: 4px 0 12px;
+}
+.kw-sg-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kw-sg-chip {
+  text-align: left;
+  border: 1px solid #e3e3e8;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: #333;
+  cursor: pointer;
+}
+.kw-sg-chip:hover {
+  background: #f2f2f5;
+}
+
 .kw-msg {
   display: flex;
 }

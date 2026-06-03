@@ -410,6 +410,24 @@ export function useKaily() {
     [bot],
   );
 
+  // ── Suggestions ────────────────────────────────────────────────────────────
+  // Fetch the starter greeting + suggested prompts for the current page.
+  const getSuggestions = useCallback(
+    async (path = window.location.pathname) => {
+      if (!bot) return null;
+      const res = await bot.getSuggestions({ path });
+      const d = res?.data || res || {};
+      return {
+        greeting: d.titleGreeting || "",
+        text: d.titleText || "",
+        prompts: (d.actions || [])
+          .map((a) => a?.label || a?.text || a)
+          .filter((p) => typeof p === "string" && p),
+      };
+    },
+    [bot],
+  );
+
   return {
     bot,
     status,
@@ -436,5 +454,6 @@ export function useKaily() {
     uploadFile,
     setDocuments,
     uploadHtmlComponent,
+    getSuggestions,
   };
 }

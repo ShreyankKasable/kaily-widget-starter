@@ -3,7 +3,7 @@
 // to the useKaily hook. This is the main file to edit when you customize the UI.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { config } from "../config";
 import { useKaily } from "../kaily/useKaily";
 import { Launcher } from "./Launcher";
@@ -28,12 +28,24 @@ export function Widget() {
     deleteThread,
     deleteAllThreads,
     uploadFile,
+    getSuggestions,
   } = useKaily();
 
   const accent = config.theme.primaryColor;
   const side = config.theme.position === "bottom-left" ? "kw-left" : "";
   const threadsEnabled = config.features.threads;
   const attachmentsEnabled = config.features.attachments;
+
+  // Fetch suggested prompts once the bot is ready and the chat is empty.
+  const [suggestions, setSuggestions] = useState(null);
+  useEffect(() => {
+    if (!config.features.suggestions) return;
+    if (status === "ready" && messages.length === 0) {
+      getSuggestions()
+        .then(setSuggestions)
+        .catch((e) => console.error("[kaily-widget] suggestions failed:", e));
+    }
+  }, [status, messages.length, getSuggestions]);
 
   if (!open) {
     return (
@@ -71,7 +83,12 @@ export function Widget() {
         </div>
       </div>
 
-      <MessageList messages={messages} accent={accent} />
+      <MessageList
+        messages={messages}
+        accent={accent}
+        suggestions={suggestions}
+        onPickSuggestion={(p) => send(p)}
+      />
 
       <Composer
         accent={accent}
