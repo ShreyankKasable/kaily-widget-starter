@@ -51,7 +51,7 @@ export const config = {
     attachments: true, // file uploads
     suggestions: true, // suggested replies
     feedback: true, // thumbs up/down on bot replies
-    voiceCall: false, // voice calls (advanced)
+    voiceCall: true, // voice calls (advanced)
     videoCall: false, // video calls (advanced)
   },
 };

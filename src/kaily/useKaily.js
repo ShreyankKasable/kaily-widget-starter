@@ -426,6 +426,23 @@ export function useKaily() {
     [bot],
   );
 
+  // ── Voice call ─────────────────────────────────────────────────────────────
+  // initiateWebCall starts a call SESSION and returns connection data (a Retell
+  // access token). The UI (VoiceButton) feeds that token to RetellWebClient,
+  // which handles mic capture + audio playback. endVoiceCall tears it down.
+  const startVoiceCall = useCallback(
+    (onComponent) =>
+      bot?.initiateWebCall(
+        { thread_id: threadId.current || bot?.currentThreadId },
+        { componentListener: onComponent || (() => {}) },
+      ),
+    [bot],
+  );
+  const endVoiceCall = useCallback(
+    () => bot?.disconnectWebCall({ thread_id: threadId.current || undefined }),
+    [bot],
+  );
+
   // ── Feedback ───────────────────────────────────────────────────────────────
   // Rate a bot reply. rating: "POSITIVE" | "NEGATIVE".
   const sendFeedback = useCallback(
@@ -485,5 +502,7 @@ export function useKaily() {
     uploadHtmlComponent,
     getSuggestions,
     sendFeedback,
+    startVoiceCall,
+    endVoiceCall,
   };
 }

@@ -10,6 +10,7 @@ import { Launcher } from "./Launcher";
 import { MessageList } from "./MessageList";
 import { Composer } from "./Composer";
 import { HistoryPanel } from "./HistoryPanel";
+import { VoiceButton } from "./VoiceButton";
 import "./styles.css";
 
 export function Widget() {
@@ -30,12 +31,15 @@ export function Widget() {
     uploadFile,
     getSuggestions,
     sendFeedback,
+    startVoiceCall,
+    endVoiceCall,
   } = useKaily();
 
   const accent = config.theme.primaryColor;
   const side = config.theme.position === "bottom-left" ? "kw-left" : "";
   const threadsEnabled = config.features.threads;
   const attachmentsEnabled = config.features.attachments;
+  const voiceEnabled = config.features.voiceCall;
 
   // Fetch suggested prompts once the bot is ready and the chat is empty.
   const [suggestions, setSuggestions] = useState(null);
@@ -64,6 +68,12 @@ export function Widget() {
       <div className="kw-header" style={{ background: accent }}>
         <span>{config.theme.title}</span>
         <div className="kw-header-actions">
+          {voiceEnabled && (
+            <VoiceButton
+              startVoiceCall={startVoiceCall}
+              endVoiceCall={endVoiceCall}
+            />
+          )}
           {threadsEnabled && (
             <button
               className="kw-icon-btn"
