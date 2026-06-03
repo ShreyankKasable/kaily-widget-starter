@@ -281,6 +281,14 @@ export function useKaily() {
     [bot, sending, listeners, patchActive, mergeActive, finish],
   );
 
+  // Subscribe to an existing thread's reply/delta stream (without sending a
+  // message). Advanced — useful when resuming a live thread.
+  const subscribeToMessage = useCallback(
+    (requestData, streamListeners) =>
+      bot?.subscribeToMessage(requestData, streamListeners),
+    [bot],
+  );
+
   // ── Stop the in-progress reply ─────────────────────────────────────────────
   const stop = useCallback(async () => {
     if (!bot || !sending) return;
@@ -540,5 +548,6 @@ export function useKaily() {
     sendVideoMessage,
     endVideoCall,
     getAIActions,
+    subscribeToMessage,
   };
 }
