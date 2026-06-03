@@ -63,12 +63,16 @@ function readDataUrl(file) {
   });
 }
 
-// Pull the final assistant text out of a reply/result payload.
-function lastContent(res) {
+// Pull the final assistant message object out of a reply/result payload.
+function lastMessage(res) {
   const arr = Array.isArray(res?.data)
     ? res.data
     : res?.data?.messages || [res?.data];
-  return arr?.[arr.length - 1]?.content || "";
+  return arr?.[arr.length - 1] || null;
+}
+
+function lastContent(res) {
+  return lastMessage(res)?.content || "";
 }
 
 function normalizeMessages(res) {
@@ -164,6 +168,15 @@ export function useKaily() {
     );
   }, []);
 
+  // Merge fields (e.g. the server message id) into the active bubble.
+  const mergeActive = useCallback((fields) => {
+    const id = activeBotId.current;
+    if (!id) return;
+    setMessages((list) =>
+      list.map((m) => (m.id === id ? { ...m, ...fields } : m)),
+    );
+  }, []);
+
   // End the current turn (idempotent — the listener and the result-fallback may
   // both try). The reply streams over a socket, so bot.message() resolves early;
   // we end "sending" when the reply finalizes, not when the promise resolves.
@@ -183,13 +196,15 @@ export function useKaily() {
         if (stopped.current) return;
         patchActive(r?.data?.content || "");
       },
-      // Final answer — capture the thread id, set full text, end the stream.
+      // Final answer — capture the thread id, set full text, store the server
+      // message id (needed for feedback), end the stream.
       replyListener: (r) => {
         if (stopped.current) return;
         const tid = pickThreadId(r, botRef.current);
         if (tid) threadId.current = tid;
-        const content = lastContent(r);
-        if (content) patchActive(content, true);
+        const last = lastMessage(r);
+        if (last?.content) patchActive(last.content, true);
+        if (last?.id) mergeActive({ serverId: last.id });
         finish();
       },
       // The SDK calls these directly, so they must exist. Hook them up if you
@@ -198,7 +213,7 @@ export function useKaily() {
       toolMessageListener: () => {},
       toolComponentMessageListener: () => {},
     }),
-    [patchActive, finish],
+    [patchActive, mergeActive, finish],
   );
 
   // ── Send a message and stream the reply ────────────────────────────────────
@@ -250,9 +265,10 @@ export function useKaily() {
         // replyListener. Only finalize here if it carries content; otherwise
         // keep waiting for the socket stream.
         if (!finished.current && !stopped.current) {
-          const content = lastContent(res);
-          if (content) {
-            patchActive(content, true);
+          const last = lastMessage(res);
+          if (last?.content) {
+            patchActive(last.content, true);
+            if (last?.id) mergeActive({ serverId: last.id });
             finish();
           }
         }
@@ -262,7 +278,7 @@ export function useKaily() {
         finish();
       }
     },
-    [bot, sending, listeners, patchActive, finish],
+    [bot, sending, listeners, patchActive, mergeActive, finish],
   );
 
   // ── Stop the in-progress reply ─────────────────────────────────────────────
@@ -410,6 +426,19 @@ export function useKaily() {
     [bot],
   );
 
+  // ── Feedback ───────────────────────────────────────────────────────────────
+  // Rate a bot reply. rating: "POSITIVE" | "NEGATIVE".
+  const sendFeedback = useCallback(
+    (messageId, rating, comment = "") =>
+      bot?.feedback({
+        thread_id: threadId.current || undefined,
+        message_id: messageId,
+        rating,
+        comment,
+      }),
+    [bot],
+  );
+
   // ── Suggestions ────────────────────────────────────────────────────────────
   // Fetch the starter greeting + suggested prompts for the current page.
   const getSuggestions = useCallback(
@@ -455,5 +484,6 @@ export function useKaily() {
     setDocuments,
     uploadHtmlComponent,
     getSuggestions,
+    sendFeedback,
   };
 }

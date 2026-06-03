@@ -228,8 +228,16 @@
 .kw-msg.kw-bot {
   justify-content: flex-start;
 }
-.kw-bubble {
+.kw-msg-col {
+  display: flex;
+  flex-direction: column;
   max-width: 80%;
+}
+.kw-msg.kw-user .kw-msg-col {
+  align-items: flex-end;
+}
+.kw-bubble {
+  max-width: 100%;
   padding: 9px 13px;
   border-radius: 14px;
   font-size: 14px;
@@ -300,6 +308,28 @@
 .kw-md td {
   border: 1px solid #ddd;
   padding: 4px 8px;
+}
+
+.kw-feedback {
+  display: flex;
+  gap: 4px;
+  margin: 2px 0 0 2px;
+}
+.kw-feedback button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  opacity: 0.5;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.kw-feedback button:hover {
+  opacity: 1;
+  background: #eee;
+}
+.kw-feedback button.kw-fb-on {
+  opacity: 1;
 }
 
 .kw-msg-files {

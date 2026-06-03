@@ -1,11 +1,46 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+// 👍/👎 on a bot reply. Locks after the first vote.
+function Feedback({ messageId, onFeedback }) {
+  const [rating, setRating] = useState(null);
+  const pick = (r) => {
+    if (rating) return;
+    setRating(r);
+    onFeedback?.(messageId, r);
+  };
+  return (
+    <div className="kw-feedback">
+      <button
+        className={rating === "POSITIVE" ? "kw-fb-on" : ""}
+        onClick={() => pick("POSITIVE")}
+        aria-label="Good response"
+      >
+        👍
+      </button>
+      <button
+        className={rating === "NEGATIVE" ? "kw-fb-on" : ""}
+        onClick={() => pick("NEGATIVE")}
+        aria-label="Bad response"
+      >
+        👎
+      </button>
+    </div>
+  );
+}
 
 // Renders the chat transcript and keeps it scrolled to the latest message.
 // Bot replies arrive as Markdown (images, links, lists, bold, …) and are
 // rendered with react-markdown. User messages are shown as plain text.
-export function MessageList({ messages, accent, suggestions, onPickSuggestion }) {
+export function MessageList({
+  messages,
+  accent,
+  suggestions,
+  onPickSuggestion,
+  feedbackEnabled,
+  onFeedback,
+}) {
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -40,12 +75,13 @@ export function MessageList({ messages, accent, suggestions, onPickSuggestion })
         ))}
       {messages.map((m) => (
         <div key={m.id} className={`kw-msg kw-${m.role}`}>
-          <div
-            className="kw-bubble"
-            style={
-              m.role === "user" ? { background: accent, color: "#fff" } : undefined
-            }
-          >
+          <div className="kw-msg-col">
+            <div
+              className="kw-bubble"
+              style={
+                m.role === "user" ? { background: accent, color: "#fff" } : undefined
+              }
+            >
             {m.role === "bot" ? (
               m.text ? (
                 <div className="kw-md">
@@ -82,6 +118,11 @@ export function MessageList({ messages, accent, suggestions, onPickSuggestion })
                   </a>
                 ))}
               </div>
+            )}
+            </div>
+
+            {feedbackEnabled && m.role === "bot" && m.text && (
+              <Feedback messageId={m.serverId || m.id} onFeedback={onFeedback} />
             )}
           </div>
         </div>

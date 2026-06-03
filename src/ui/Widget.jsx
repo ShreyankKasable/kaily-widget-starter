@@ -29,6 +29,7 @@ export function Widget() {
     deleteAllThreads,
     uploadFile,
     getSuggestions,
+    sendFeedback,
   } = useKaily();
 
   const accent = config.theme.primaryColor;
@@ -88,6 +89,8 @@ export function Widget() {
         accent={accent}
         suggestions={suggestions}
         onPickSuggestion={(p) => send(p)}
+        feedbackEnabled={config.features.feedback}
+        onFeedback={sendFeedback}
       />
 
       <Composer
