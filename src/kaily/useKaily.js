@@ -434,49 +434,6 @@ export function useKaily() {
     [bot],
   );
 
-  // ── Voice call ─────────────────────────────────────────────────────────────
-  // initiateWebCall starts a call SESSION and returns connection data (a Retell
-  // access token). The UI (VoiceButton) feeds that token to RetellWebClient,
-  // which handles mic capture + audio playback. endVoiceCall tears it down.
-  const startVoiceCall = useCallback(
-    (onComponent) =>
-      bot?.initiateWebCall(
-        { thread_id: threadId.current || bot?.currentThreadId },
-        { componentListener: onComponent || (() => {}) },
-      ),
-    [bot],
-  );
-  const endVoiceCall = useCallback(
-    () => bot?.disconnectWebCall({ thread_id: threadId.current || undefined }),
-    [bot],
-  );
-
-  // ── Video call ─────────────────────────────────────────────────────────────
-  // initiateWebVideoCall returns an Anam session token; the UI (VideoCall)
-  // streams the talking avatar via @anam-ai/js-sdk. videoCallMessage relays the
-  // user's speech to the bot and the reply text drives client.talk(). getAIActions
-  // fetches AI-driven frontend actions for the call.
-  const startVideoCall = useCallback(
-    (onComponent) =>
-      bot?.initiateWebVideoCall(
-        { thread_id: threadId.current || bot?.currentThreadId },
-        { componentListener: onComponent || (() => {}) },
-      ),
-    [bot],
-  );
-  const sendVideoMessage = useCallback(
-    (text, listeners, endEvent) =>
-      bot?.videoCallMessage(
-        { text, thread_id: threadId.current || undefined },
-        listeners,
-        endEvent,
-      ),
-    [bot],
-  );
-  const endVideoCall = useCallback(
-    () => bot?.disconnectWebCall({ thread_id: threadId.current || undefined }),
-    [bot],
-  );
   const getAIActions = useCallback(
     (requestData = { thread_id: threadId.current || undefined }) =>
       bot?.getAIActions(requestData),
@@ -542,11 +499,6 @@ export function useKaily() {
     uploadHtmlComponent,
     getSuggestions,
     sendFeedback,
-    startVoiceCall,
-    endVoiceCall,
-    startVideoCall,
-    sendVideoMessage,
-    endVideoCall,
     getAIActions,
     subscribeToMessage,
   };

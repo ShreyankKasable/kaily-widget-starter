@@ -22,8 +22,6 @@
  * @property {boolean} attachments  File uploads in the composer.
  * @property {boolean} suggestions  Suggested replies.
  * @property {boolean} feedback     Thumbs up/down on bot replies.
- * @property {boolean} voiceCall    Voice calls (advanced).
- * @property {boolean} videoCall    Video calls (advanced).
  */
 
 /**

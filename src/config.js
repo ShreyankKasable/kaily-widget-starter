@@ -52,8 +52,6 @@ export const config = {
     threads: true, // conversation history panel
     attachments: true, // file uploads
     suggestions: true, // suggested replies
-    feedback: true, // thumbs up/down on bot replies
-    voiceCall: false, // voice calls (advanced — needs Retell on your bot)
-    videoCall: false, // video calls (advanced — needs Anam on your bot)
+    feedback: false, // thumbs up/down on bot replies
   },
 };
