@@ -10,10 +10,6 @@ try {
   });
   console.log("✓ Undeployed successfully.");
 } catch (err) {
-  if (err?.response?.status === 400 || err?.message === 'No custom widget deployed') {
-    console.error("✗ Undeploy failed: No custom widget deployed for this token.");
-  } else {
-    console.error("✗ Undeploy failed:", err.message);
-  }
+  console.error("✗ Undeploy failed:", err.message);
   process.exit(1);
 }
