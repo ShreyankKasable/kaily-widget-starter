@@ -1,12 +1,18 @@
-// Deploys the built widget to the Kaily CDN (run `npm run build` first, or use
-// `npm run deploy`). Set your token and API base URL below.
-const path = require("node:path");
-const { deploy } = require("@kaily-ai/chat-sdk");
+// Deploys the widget to the Kaily CDN. Run `npm run deploy`.
+// seraph's deploy() bundles src/index.jsx (JS + CSS) and uploads it — we just call it.
+import { deploy } from "@kaily-ai/chat-sdk/deploy";
+import { config } from "./src/config.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-(async () => {
-  const url = await deploy(path.join(__dirname, "dist/widget.js"), {
-    token: "cat-c7ghiybb",
-    serviceBaseUrl: "http://localhost:3000",
-  });
-  console.log("\n✓ Deployed! Embed URL:", url);
-})();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const url = await deploy(path.join(__dirname, "src/index.jsx"), {
+  token: config.token,
+  ...(config.environment
+    ? { environment: config.environment }
+    : { serviceBaseUrl: config.serviceBaseUrl }),
+});
+
+console.log("\n✓ Deployed! Embed URL:", url);
+console.log(`  <script src="${url}"></script>`);

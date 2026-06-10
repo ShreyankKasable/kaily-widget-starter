@@ -1,0 +1,424 @@
+/* All widget styles are prefixed `.kw-` to avoid clashing with the host page. */
+
+.kw-launcher {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  z-index: 2147483000;
+}
+.kw-launcher.kw-left {
+  right: auto;
+  left: 24px;
+}
+
+.kw-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 370px;
+  max-width: calc(100vw - 32px);
+  height: 560px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  z-index: 2147483000;
+}
+.kw-panel.kw-left {
+  right: auto;
+  left: 24px;
+}
+
+.kw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+}
+.kw-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.kw-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.kw-icon-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* History panel — slides over the chat. */
+.kw-history {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  z-index: 5;
+}
+.kw-new {
+  margin: 12px;
+  padding: 10px;
+  border: 1px dashed #ccc;
+  border-radius: 10px;
+  background: #fafafa;
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+}
+.kw-history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.kw-thread {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 4px 6px 4px 12px;
+}
+.kw-thread:hover {
+  background: #eeeef2;
+}
+.kw-thread-main {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 6px 0;
+  cursor: pointer;
+}
+.kw-thread-title {
+  font-size: 14px;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kw-thread-date {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}
+.kw-thread-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.kw-thread:hover .kw-thread-actions {
+  opacity: 1;
+}
+.kw-thread-actions button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px;
+  border-radius: 6px;
+}
+.kw-thread-actions button:hover {
+  background: #ddd;
+}
+.kw-clear-all {
+  margin: 8px 12px 12px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #e5484d;
+  font-size: 13px;
+  cursor: pointer;
+}
+.kw-clear-all:hover {
+  background: #fdecec;
+}
+
+.kw-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f7f7f9;
+}
+.kw-empty {
+  margin: auto;
+  color: #999;
+  font-size: 14px;
+  text-align: center;
+}
+
+.kw-suggestions {
+  margin: auto 0 0;
+}
+.kw-sg-greeting {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.kw-sg-text {
+  font-size: 13px;
+  color: #777;
+  margin: 4px 0 12px;
+}
+.kw-sg-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kw-sg-chip {
+  text-align: left;
+  border: 1px solid #e3e3e8;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: #333;
+  cursor: pointer;
+}
+.kw-sg-chip:hover {
+  background: #f2f2f5;
+}
+
+.kw-msg {
+  display: flex;
+}
+.kw-msg.kw-user {
+  justify-content: flex-end;
+}
+.kw-msg.kw-bot {
+  justify-content: flex-start;
+}
+.kw-msg-col {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+.kw-msg.kw-user .kw-msg-col {
+  align-items: flex-end;
+}
+.kw-bubble {
+  max-width: 100%;
+  padding: 9px 13px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: #fff;
+  color: #1a1a1a;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Rendered Markdown inside bot bubbles. */
+.kw-md {
+  /* The bubble uses pre-wrap for plain user text; markdown is real HTML, so
+     reset it here — otherwise whitespace between block elements shows as big gaps. */
+  white-space: normal;
+}
+.kw-md > :first-child {
+  margin-top: 0;
+}
+.kw-md > :last-child {
+  margin-bottom: 0;
+}
+.kw-md p {
+  margin: 0 0 8px;
+}
+.kw-md img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  margin: 4px 0;
+}
+.kw-md a {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+.kw-md ul,
+.kw-md ol {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+.kw-md li {
+  margin: 2px 0;
+}
+.kw-md pre {
+  background: #f0f0f3;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 12.5px;
+}
+.kw-md code {
+  background: #f0f0f3;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 12.5px;
+}
+.kw-md pre code {
+  background: none;
+  padding: 0;
+}
+.kw-md table {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.kw-md th,
+.kw-md td {
+  border: 1px solid #ddd;
+  padding: 4px 8px;
+}
+
+.kw-feedback {
+  display: flex;
+  gap: 4px;
+  margin: 2px 0 0 2px;
+}
+.kw-feedback button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  opacity: 0.5;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.kw-feedback button:hover {
+  opacity: 1;
+  background: #eee;
+}
+.kw-feedback button.kw-fb-on {
+  opacity: 1;
+}
+
+.kw-msg-files {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+.kw-file-link {
+  font-size: 12.5px;
+  color: inherit;
+  text-decoration: underline;
+  opacity: 0.9;
+}
+
+.kw-composer {
+  border-top: 1px solid #eee;
+  background: #fff;
+}
+.kw-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px 0;
+}
+.kw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eef0ff;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #333;
+}
+.kw-chip button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  color: #777;
+}
+.kw-attach {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.kw-attach:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.kw-input {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px;
+}
+.kw-input input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+}
+.kw-input input:focus {
+  border-color: #bbb;
+}
+.kw-input button {
+  border: none;
+  color: #fff;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.kw-input button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.kw-input button.kw-stop {
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
