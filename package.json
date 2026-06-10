@@ -12,7 +12,7 @@
     "undeploy": "node undeploy.js"
   },
   "dependencies": {
-    "@kaily-ai/chat-sdk": "2.1.6-beta.4",
+    "@kaily-ai/chat-sdk": "file:/Users/shreyanksanjaykasable/Desktop/copilot-repo/Boltic/services/seraph",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.1.0",
