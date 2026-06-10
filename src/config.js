@@ -9,12 +9,12 @@
 export const config = {
   // ── Connection (REQUIRED) ──
   // Get these from the Kaily dashboard. Replace the placeholders before running.
-  token: "cat-xxxxxxxx", // your bot token
-  serviceBaseUrl: "https://asia-south1.public.copilotz0.de", // your Kaily API base URL
+  token: "cat-00hrne6v", // your bot token
+  // serviceBaseUrl: "https://asia-south1.public.uat.copilotz0.de", // your Kaily API base URL
   surfaceClient: "web",
+  environment: "uat",
   // Optional shortcut to a known Kaily cluster: "production" | "uat" | "sit".
   // ⚠️ If set, this OVERRIDES serviceBaseUrl above. Leave it out to use serviceBaseUrl.
-  // environment: "production",
 
   // ── User identity (optional) ──
   // Anonymous by default. To scope conversations to a logged-in user, fill this

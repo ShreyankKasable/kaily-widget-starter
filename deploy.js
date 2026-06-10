@@ -8,8 +8,10 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const url = await deploy(path.join(__dirname, "src/index.jsx"), {
-  token: config.token, // same token as the widget
-  serviceBaseUrl: config.serviceBaseUrl,
+  token: config.token,
+  ...(config.environment
+    ? { environment: config.environment }
+    : { serviceBaseUrl: config.serviceBaseUrl }),
 });
 
 console.log("\n✓ Deployed! Embed URL:", url);
