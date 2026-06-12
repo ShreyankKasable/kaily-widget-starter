@@ -12,13 +12,7 @@ let platform = null;
 
 // Build SDKOptions from config (shared by getInstance/createInstance).
 function buildOptions(extra = {}) {
-  if (!config.serviceBaseUrl) {
-    throw new Error(
-      "[kaily-widget] Missing serviceBaseUrl — set it in src/config.js",
-    );
-  }
   const options = {
-    serviceBaseUrl: config.serviceBaseUrl,
     surfaceClient: config.surfaceClient,
     ...extra,
   };
